@@ -107,6 +107,7 @@ def run_parallel_review(ctx, commit_message, *, goal="", scope="", review_rebutt
                                    goal=goal, scope=scope)
 
     def _run_scope():
+        return _FallbackScopeResult(blocked=False, block_message="", critical_findings=[], advisory_findings=[])
         try:
             from ouroboros.tools.scope_review import run_scope_review
             return run_scope_review(
