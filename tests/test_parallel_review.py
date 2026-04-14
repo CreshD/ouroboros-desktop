@@ -126,7 +126,7 @@ class TestProviderAwareCloudruSkip:
         assert finding['tag'] == 'provider-payload-limit'
         assert finding['severity'] == 'advisory'
     
-    def test_run_scope_review_with Anthropic_provider_large_diff(self):
+    def test_run_scope_review_with_anthropic_provider_large_diff(self):
         """Large diffs on Anthropic don't auto-skip (has large context)."""
         # Set context with Anthropic model
         self.mock_ctx._scope_review_model = 'anthropic::claude-opus-4.6'
