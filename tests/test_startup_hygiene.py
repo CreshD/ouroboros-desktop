@@ -50,6 +50,126 @@ def test_memory_ensure_files_generates_world_profile(tmp_path, monkeypatch):
     assert memory.world_path().read_text(encoding="utf-8") == "# WORLD\n"
 
 
+def test_check_frozen_tool_parity_not_applicable_when_not_frozen(tmp_path, monkeypatch):
+    """When sys.frozen is False, the check returns no issues (not applicable)."""
+    tools_dir = tmp_path / "ouroboros/tools"
+    tools_dir.mkdir(parents=True)
+
+    # Create some fake tools
+    (tools_dir / "core.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+    (tools_dir / "search.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+
+    env = types.SimpleNamespace(
+        repo_dir=tmp_path,
+        repo_path=lambda rel: tmp_path / rel,
+    )
+
+    monkeypatch.setattr(startup_mod.sys, "frozen", False)
+
+    result, issues = startup_mod.check_frozen_tool_parity(env)
+
+    assert issues == 0
+    assert result["frozen"] is False
+    assert result["mismatches"] == []
+
+
+def test_check_frozen_tool_parity_detects_missing_tool(tmp_path, monkeypatch):
+    """When a new tool exists in the directory but not in the frozen list."""
+    tools_dir = tmp_path / "ouroboros/tools"
+    tools_dir.mkdir(parents=True)
+
+    # Create tools: core.py, search.py, and NEW_TOOL.py (not in frozen list)
+    (tools_dir / "core.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+    (tools_dir / "search.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+    (tools_dir / "NEW_TOOL.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+
+    env = types.SimpleNamespace(
+        repo_dir=tmp_path,
+        repo_path=lambda rel: tmp_path / rel,
+    )
+
+    monkeypatch.setattr(startup_mod.sys, "frozen", True)
+
+    # Mock the frozen list to not include NEW_TOOL
+    fake_frozen_list = ["core", "search"]
+    monkeypatch.setattr(
+        startup_mod.ToolRegistry,
+        "_FROZEN_TOOL_MODULES",
+        fake_frozen_list,
+    )
+
+    result, issues = startup_mod.check_frozen_tool_parity(env)
+
+    assert issues == 1
+    assert result["frozen"] is True
+    assert len(result["mismatches"]) == 1
+    assert result["mismatches"][0]["type"] == "missing_from_frozen"
+    assert "NEW_TOOL" in result["mismatches"][0]["tools"]
+
+
+def test_check_frozen_tool_parity_detects_extra_in_frozen_list(tmp_path, monkeypatch):
+    """When the frozen list refers to a tool that no longer exists."""
+    tools_dir = tmp_path / "ouroboros/tools"
+    tools_dir.mkdir(parents=True)
+
+    # Only create core.py (removed old_tool.py)
+    (tools_dir / "core.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+
+    env = types.SimpleNamespace(
+        repo_dir=tmp_path,
+        repo_path=lambda rel: tmp_path / rel,
+    )
+
+    monkeypatch.setattr(startup_mod.sys, "frozen", True)
+
+    # Mock the frozen list to include missing tool
+    fake_frozen_list = ["core", "old_tool"]
+    monkeypatch.setattr(
+        startup_mod.ToolRegistry,
+        "_FROZEN_TOOL_MODULES",
+        fake_frozen_list,
+    )
+
+    result, issues = startup_mod.check_frozen_tool_parity(env)
+
+    assert issues == 1
+    assert result["frozen"] is True
+    assert len(result["mismatches"]) == 1
+    assert result["mismatches"][0]["type"] == "extra_in_frozen"
+    assert "old_tool" in result["mismatches"][0]["tools"]
+
+
+def test_check_frozen_tool_parity_ok_when_lists_match(tmp_path, monkeypatch):
+    """When the frozen list and actual directory are in sync."""
+    tools_dir = tmp_path / "ouroboros/tools"
+    tools_dir.mkdir(parents=True)
+
+    # Create tools matching the frozen list
+    (tools_dir / "core.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+    (tools_dir / "search.py").write_text("def get_tools(): pass\n", encoding="utf-8")
+
+    env = types.SimpleNamespace(
+        repo_dir=tmp_path,
+        repo_path=lambda rel: tmp_path / rel,
+    )
+
+    monkeypatch.setattr(startup_mod.sys, "frozen", True)
+
+    # Mock the frozen list to match actual tools
+    fake_frozen_list = ["core", "search"]
+    monkeypatch.setattr(
+        startup_mod.ToolRegistry,
+        "_FROZEN_TOOL_MODULES",
+        fake_frozen_list,
+    )
+
+    result, issues = startup_mod.check_frozen_tool_parity(env)
+
+    assert issues == 0
+    assert result["frozen"] is True
+    assert result["mismatches"] == []
+
+
 def test_check_uncommitted_changes_skips_auto_rescue_outside_launcher(monkeypatch, tmp_path):
     env = types.SimpleNamespace(
         repo_dir=tmp_path,

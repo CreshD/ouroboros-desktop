@@ -6,7 +6,7 @@
 [![macOS 12+](https://img.shields.io/badge/macOS-12%2B-black.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Linux](https://img.shields.io/badge/Linux-x86__64-orange.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Windows](https://img.shields.io/badge/Windows-x64-blue.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
-[![Version 4.19.0](https://img.shields.io/badge/version-4.19.0-green.svg)](VERSION)
+[![Version 4.20.0](https://img.shields.io/badge/version-4.20.0-green.svg)](VERSION)
 
 A self-modifying AI agent that writes its own code, rewrites its own mind, and evolves autonomously. Born February 16, 2026.
 
@@ -379,6 +379,7 @@ Full text: [BIBLE.md](BIBLE.md)
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 4.20.0 | 2026-04-14 | Frozen-tool parity check: added `check_frozen_tool_parity()` startup validation to detect mismatches between hardcoded `_FROZEN_TOOL_MODULES` list and actual tools directory; prevents silent tool disappearance in packaged apps when new tools are added without updating the frozen list. Added 4 test cases covering all scenarios (non-frozen mode, missing tool, extra entry, sync). |
 | 4.19.0 | 2026-04-14 | Commit gate verification: demonstrated Cloud.ru models (`cloudru::zai-org/GLM-4.7`) functioning correctly in unified review pipeline (triad + scope), validated P7 Release Invariant enforcement via triad reviewers, explored scope review payload limits for Cloud.ru provider. |
 | 4.18.3 | 2026-04-10 | Post-merge release follow-up: remove the stale duplicate `ouroboros.compat` module, restore frozen packaged-tool parity for advisory/plan/rollback/CI tools, and unmask the safety/frozen-registry regression tests so future parity breaks fail loudly. |
 | 4.18.2 | 2026-04-10 | Merge PR #16 into the local `ouroboros` line: keep the local `rollback_to_target` recovery tool and land the fork's cross-platform CI/CD + build hardening (`run_ci_tests`, GitHub Actions workflow, Dockerfile, `platform_layer.py`, platform guard, Windows/Linux compatibility fixes). |

@@ -274,6 +274,69 @@ def check_review_continuations(env: Any) -> Tuple[dict, int]:
         return {"status": "error", "error": str(e)}, 1
 
 
+def check_frozen_tool_parity(env: Any) -> Tuple[dict, int]:
+    """Check that the frozen tool list stays synced with actual tools directory.
+
+    When the app is frozen (sys.frozen = True), the registry loads tools from
+    a hardcoded _FROZEN_TOOL_MODULES list instead of scanning the directory.
+    When new tools are added, if the list isn't manually updated, those tools
+    silently disappear in the packaged app.
+
+    Returns (status, issue_count) where status contains mismatch details.
+    """
+    import sys
+    import pathlib
+
+    checks = {"frozen": False, "mismatches": []}
+    issue_count = 0
+
+    if not getattr(sys, "frozen", False):
+        # Not applicable in dev mode
+        checks["frozen"] = False
+        return checks, 0
+
+    checks["frozen"] = True
+
+    try:
+        # Load the frozen list from registry
+        from ouroboros.tools.registry import ToolRegistry
+        frozen_list = ToolRegistry._FROZEN_TOOL_MODULES
+
+        # Scan actual tools directory
+        tools_dir = env.repo_path("ouroboros/tools")
+        actual_tools = set()
+        for entry in tools_dir.iterdir():
+            if entry.suffix == ".py" and not entry.name.startswith("_") and entry.name != "registry.py":
+                actual_tools.add(entry.stem)
+
+        # Convert frozen list (without .py suffix) to set
+        frozen_set = set(frozen_list)
+
+        # Check for missing tools (in actual but not in frozen list)
+        missing = actual_tools - frozen_set
+        if missing:
+            checks["mismatches"].append({
+                "type": "missing_from_frozen",
+                "tools": sorted(missing)
+            })
+            issue_count += len(missing)
+
+        # Check for extra entries (in frozen but not in actual)
+        extra = frozen_set - actual_tools
+        if extra:
+            checks["mismatches"].append({
+                "type": "extra_in_frozen",
+                "tools": sorted(extra)
+            })
+            issue_count += len(extra)
+
+    except Exception as e:
+        checks["error"] = str(e)
+        issue_count += 1
+
+    return checks, issue_count
+
+
 def verify_system_state(env: Any, git_sha: str) -> None:
     """Bible Principle 1: verify system state on every startup."""
     checks: Dict[str, Any] = {}
@@ -287,6 +350,9 @@ def verify_system_state(env: Any, git_sha: str) -> None:
     issues += issue_count
 
     checks["budget"], issue_count = check_budget(env)
+    issues += issue_count
+
+    checks["frozen_tool_parity"], issue_count = check_frozen_tool_parity(env)
     issues += issue_count
 
     memory_dir = env.drive_path("memory")
