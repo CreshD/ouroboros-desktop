@@ -290,7 +290,7 @@ def check_frozen_tool_parity(env: Any) -> Tuple[dict, int]:
     checks = {"frozen": False, "mismatches": []}
     issue_count = 0
 
-    if not sys.frozen:
+    if not getattr(sys, "frozen", False):
         # Not applicable in dev mode
         checks["frozen"] = False
         return checks, 0

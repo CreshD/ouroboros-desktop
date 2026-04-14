@@ -4,6 +4,7 @@ import types
 import ouroboros.agent_startup_checks as startup_mod
 import ouroboros.world_profiler as world_profiler
 from ouroboros.memory import Memory
+from ouroboros.tools.registry import ToolRegistry
 
 
 def test_check_version_sync_ignores_non_release_tag(tmp_path, monkeypatch):
@@ -64,7 +65,7 @@ def test_check_frozen_tool_parity_not_applicable_when_not_frozen(tmp_path, monke
         repo_path=lambda rel: tmp_path / rel,
     )
 
-    monkeypatch.setattr(startup_mod.sys, "frozen", False)
+    monkeypatch.setattr(startup_mod.sys, "frozen", False, raising=False)
 
     result, issues = startup_mod.check_frozen_tool_parity(env)
 
@@ -88,12 +89,12 @@ def test_check_frozen_tool_parity_detects_missing_tool(tmp_path, monkeypatch):
         repo_path=lambda rel: tmp_path / rel,
     )
 
-    monkeypatch.setattr(startup_mod.sys, "frozen", True)
+    monkeypatch.setattr(startup_mod.sys, "frozen", True, raising=False)
 
     # Mock the frozen list to not include NEW_TOOL
     fake_frozen_list = ["core", "search"]
     monkeypatch.setattr(
-        startup_mod.ToolRegistry,
+        ToolRegistry,
         "_FROZEN_TOOL_MODULES",
         fake_frozen_list,
     )
@@ -120,12 +121,12 @@ def test_check_frozen_tool_parity_detects_extra_in_frozen_list(tmp_path, monkeyp
         repo_path=lambda rel: tmp_path / rel,
     )
 
-    monkeypatch.setattr(startup_mod.sys, "frozen", True)
+    monkeypatch.setattr(startup_mod.sys, "frozen", True, raising=False)
 
     # Mock the frozen list to include missing tool
     fake_frozen_list = ["core", "old_tool"]
     monkeypatch.setattr(
-        startup_mod.ToolRegistry,
+        ToolRegistry,
         "_FROZEN_TOOL_MODULES",
         fake_frozen_list,
     )
@@ -153,12 +154,12 @@ def test_check_frozen_tool_parity_ok_when_lists_match(tmp_path, monkeypatch):
         repo_path=lambda rel: tmp_path / rel,
     )
 
-    monkeypatch.setattr(startup_mod.sys, "frozen", True)
+    monkeypatch.setattr(startup_mod.sys, "frozen", True, raising=False)
 
     # Mock the frozen list to match actual tools
     fake_frozen_list = ["core", "search"]
     monkeypatch.setattr(
-        startup_mod.ToolRegistry,
+        ToolRegistry,
         "_FROZEN_TOOL_MODULES",
         fake_frozen_list,
     )
