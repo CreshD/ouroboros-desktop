@@ -880,15 +880,23 @@ errors surface via the same observability path.
 - Applies to both `_repo_commit_push` and `_repo_write_commit` (legacy path).
 - Orchestration logic extracted to `ouroboros/tools/parallel_review.py` (P5 Minimalism — relieves git.py size pressure).
 
-#### Provider payload limits and scope review skip (v4.20.0)
+#### Provider payload limits and scope review skip (v4.20.0, enhanced v4.22.0)
 
 Some providers have strict payload limits that reject the full-repo context required by scope review (~800K tokens for `build_full_repo_pack`). For example, Cloud.ru models (`cloudru::*`) fail with `APIStatusError: Payload Too Large`.
 
-- **`OUROBOROS_SKIP_SCOPE_REVIEW` environment variable**: Set to `"1"` to disable scope review entirely.
-  When set, review pipeline uses triad-only validation. Trade-off: reduced cross-module safety, but commits proceed on providers with payload limits.
-- **Use case**: When only Cloud.ru keys are available and scope review cannot run, set `OUROBOROS_SKIP_SCOPE_REVIEW=1` before commits. Triad review still validates the diff against CHECKLISTS.md.
-- **Implementation**: Checked in `parallel_review.py::_run_scope()` before invoking scope reviewer. Returns a non-blocking fallback result when the flag is set.
-- **Documented rationale**: Cloud.ru models work well for triad review (diff-only context) but cannot handle full-repo scope review. The environment variable makes this constraint explicit and configurable rather than hardcoded.
+The review pipeline supports both manual override and provider-aware automatic skip:
+
+**Manual override:**
+- **`OUROBOROS_SKIP_SCOPE_REVIEW` environment variable**: Set to `"1"` to disable scope review entirely for this commit.
+- **Use case**: Force triad-only validation on providers with payload limits.
+- **Implementation**: Checked first in `parallel_review.py::_run_scope()`. Returns a non-blocking fallback result when the flag is set.
+
+**Provider-aware auto-skip (v4.22.0+):**
+- **Automatic detection**: If the scope review provider model name contains 'cloudru' (case-insensitive) AND the staged diff exceeds 0.5 MB (~250K tokens estimated), scope review is automatically skipped.
+- **Audit trail**: Auto-skip emits an advisory finding (`scope_review_auto_skipped`, tag=`provider-payload-limit`) to `ctx._review_advisory`, ensuring review continuity auditability.
+- **Threshold rationale**: 0.5 MB is a conservative limit; Cloud.ru reliably handles triad review (diff-only, ~1-10KB) below this threshold but rejects full-repo scope review payloads.
+
+**Documented rationale:** Cloud.ru models work well for triad review (diff-only context) but cannot handle full-repo scope review. The environment variable and provider-aware detection make this constraint explicit, configurable, and auditable rather than hardcoded.
 
 #### Triad diff review (enriched)
 

@@ -13,6 +13,7 @@ import logging
 import os
 import re
 import subprocess
+import sys  # Used by check_frozen_tool_parity for sys.frozen
 from typing import Any, Dict, Tuple
 
 from ouroboros.utils import utc_now_iso, read_text, append_jsonl
@@ -284,13 +285,12 @@ def check_frozen_tool_parity(env: Any) -> Tuple[dict, int]:
 
     Returns (status, issue_count) where status contains mismatch details.
     """
-    import sys
     import pathlib
 
     checks = {"frozen": False, "mismatches": []}
     issue_count = 0
 
-    if not getattr(sys, "frozen", False):
+    if not sys.frozen:
         # Not applicable in dev mode
         checks["frozen"] = False
         return checks, 0

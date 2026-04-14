@@ -1,18 +1,17 @@
-"""Parallel review orchestration for the pre-commit pipeline.
+# ouroboros/tools/parallel_review.py — Parallel review orchestration for the pre-commit pipeline.
 
-Extracted from git.py (P5 Minimalism) so both _repo_commit_push and
-_repo_write_commit can share one implementation without duplication.
+# Extracted from git.py (P5 Minimalism) so both _repo_commit_push and
+# _repo_write_commit can share one implementation without duplication.
 
-Public API:
-  run_parallel_review(ctx, commit_message, *, goal, scope, review_rebuttal)
-      -> (review_err, scope_result, triad_block_reason, triad_advisory)
-  aggregate_review_verdict(review_err, scope_result, triad_block_reason, triad_advisory,
-                           ctx, commit_message, commit_start, repo_dir)
-      -> (blocked, combined_msg, block_reason, findings, scope_advisory_items)
-  The caller must apply scope_advisory_items to ctx._review_advisory on both the
-  blocked and non-blocked paths so advisory findings remain visible regardless of
-  whether the commit was blocked.
-"""
+# Public API:
+#   run_parallel_review(ctx, commit_message, *, goal, scope, review_rebuttal)
+#       -> (review_err, scope_result, triad_block_reason, triad_advisory)
+#   aggregate_review_verdict(review_err, scope_result, triad_block_reason, triad_advisory,
+#                            ctx, commit_message, commit_start, repo_dir)
+#       -> (blocked, combined_msg, block_reason, findings, scope_advisory_items)
+#   The caller must apply scope_advisory_items to ctx._review_advisory on both the
+#   blocked and non-blocked paths so advisory findings remain visible regardless of
+#   whether the commit was blocked.
 from __future__ import annotations
 
 import concurrent.futures as _cf
@@ -107,12 +106,40 @@ def run_parallel_review(ctx, commit_message, *, goal="", scope="", review_rebutt
                                    goal=goal, scope=scope)
 
     def _run_scope():
-        # Skip scope review if explicitly disabled (for providers with payload limits)
-        # Rationale: Cloud.ru models reject full-repo context (~800K tokens)
-        # Use triad-only review when OUROBOROS_SKIP_SCOPE_REVIEW=1
+        """Run scope review with provider-aware payload limit handling.
+
+        Normal providers (Anthropic, OpenAI, OpenRouter): run full scope review.
+        Cloud.ru: skip scope review for large diffs (>500KB chars) to avoid
+        Payload Too Large errors. Falls back to triad-only review.
+
+        Manual override OUROBOROS_SKIP_SCOPE_REVIEW=1 always takes precedence.
+        """
+        # Manual override always takes precedence
         import os
         if os.getenv("OUROBOROS_SKIP_SCOPE_REVIEW", "0") == "1":
             return _FallbackScopeResult(blocked=False, block_message="", critical_findings=[], advisory_findings=[])
+
+        # Provider-aware automatic skip for Cloud.ru with large diffs
+        diff_size_mb = len(diff_bytes) / (1024 * 1024)
+        provider_model = getattr(ctx, '_scope_review_model', '')
+        # Check if provider is Cloud.ru and diff exceeds safe threshold
+        if 'cloudru' in str(provider_model).lower() and diff_size_mb > 0.5:
+            log.info(
+                "Skipping scope review: Cloud.ru provider with large diff (%.2f MB > 0.5 MB threshold). "
+                "Using triad-only review for this commit.", diff_size_mb
+            )
+            return _FallbackScopeResult(
+                blocked=False,
+                block_message="",
+                critical_findings=[],
+                advisory_findings=[{
+                    "item": "scope_review_auto_skipped",
+                    "reason": "Cloud.ru payload exceeds 0.5 MB threshold. Using triad-only review.",
+                    "severity": "advisory",
+                    "tag": "provider-payload-limit",
+                    "model": str(provider_model),
+                }]
+            )
 
         try:
             from ouroboros.tools.scope_review import run_scope_review
