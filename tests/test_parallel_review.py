@@ -170,7 +170,7 @@ class TestProviderAwareCloudruSkip:
             # All Cloud.ru variants should trigger auto-skip
             assert result.blocked is False
             assert len(result.advisory_findings) == 1
-            assert finding = result.advisory_findings[0]
+            finding = result.advisory_findings[0]
             assert finding['item'] == 'scope_review_auto_skipped'
     
     def test_diff_size_threshold_at_exactly_0_5_mb(self):
@@ -186,7 +186,7 @@ class TestProviderAwareCloudruSkip:
                 blocked=False,
                 block_message="",
                 critical_findings=[],
-                advisory_findories=[]
+                advisory_findings=[]
             )
             mock_sr.return_value = mock_result
             

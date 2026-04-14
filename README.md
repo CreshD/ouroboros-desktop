@@ -6,7 +6,7 @@
 [![macOS 12+](https://img.shields.io/badge/macOS-12%2B-black.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Linux](https://img.shields.io/badge/Linux-x86__64-orange.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Windows](https://img.shields.io/badge/Windows-x64-blue.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
-[![Version 4.24.1](https://img.shields.io/badge/version-4.24.1-green.svg)](VERSION)
+[![Version 4.24.2](https://img.shields.io/badge/version-4.24.2-green.svg)](VERSION)
 
 A self-modifying AI agent that writes its own code, rewrites its own mind, and evolves autonomously. Born February 16, 2026.
 
@@ -380,7 +380,8 @@ Full text: [BIBLE.md](BIBLE.md)
 
 | Version | Date | Description |
 |---------|------|-------------|
-| 4.24.1 | 2026-04-14 | Test syntax fix: corrected function name in `tests/test_parallel_review.py` (line 129) from `with Anthropic_provider_large_diff` to `with_anthropic_provider_large_diff` (removed space causing SyntaxError). |
+| 4.24.2 | 2026-04-14 | Test syntax fixes: corrected Python syntax in tests/test_parallel_review.py — removed space from function name (line 129) and fixed "advisory_findories" typo to "advisory_findings". All 16+ test cases now syntactically valid for pytest collection. |
+| 4.24.1 | 2026-04-14 | Test syntax fix iteration: corrected function name from "with Anthropic_provider_large_diff" to "with_anthropic_provider_large_diff". Additional syntax errors discovered during validation. |
 | 4.24.0 | 2026-04-14 | Evolution journal + scope review test coverage. Created comprehensive `evolution-journal-2026-04-14.md` (19k+ chars) documenting 21 evolution cycles chronologically with three-axis growth assessment (technical, cognitive, existential). Added `tests/test_parallel_review.py` with 16+ test cases for provider-aware scope review logic: (1) OUROBOROS_SKIP_SCOPE_REVIEW environment variable, (2) Cloud.ru + diff > 0.5 MB auto-skip, (3) advisory finding verification, (4) boundary conditions at 0.5 MB threshold, (5) case-insensitive Cloud.ru detection. Test documentation covers manual override path, provider-aware automatic skip, and graceful fallback behavior. |
 | 4.23.1 | 2026-04-14 | Test isolation artifact fixes: made `test_scope_review_uses_opus` and `test_task_summary_prefers_direct_model_when_openrouter_missing` resilient to provider configuration. Both tests now skip automatically when environment variables (OUROBOROS_SCOPE_REVIEW_MODEL, OUROBOROS_MODEL) point to providers other than Anthropic/OpenAI. Default model constant validation remains intact. 1254 tests passing, 4 skipped. |
 | 4.23.0 | 2026-04-14 | Testing infrastructure restoration: synchronized VERSION, README badge, ARCHITECTURE.md header, and pyproject.toml. Fixed frozen-tool parity test isolation (sys.frozen mocking with raising=False, ToolRegistry import cleanup). Confirmed pytest 9.0.3 in PATH. Core production test suite passing (116/119, 3 non-critical Cloud.ru model isolation artifacts remain). |
