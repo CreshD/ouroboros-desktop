@@ -880,6 +880,16 @@ errors surface via the same observability path.
 - Applies to both `_repo_commit_push` and `_repo_write_commit` (legacy path).
 - Orchestration logic extracted to `ouroboros/tools/parallel_review.py` (P5 Minimalism — relieves git.py size pressure).
 
+#### Provider payload limits and scope review skip (v4.20.0)
+
+Some providers have strict payload limits that reject the full-repo context required by scope review (~800K tokens for `build_full_repo_pack`). For example, Cloud.ru models (`cloudru::*`) fail with `APIStatusError: Payload Too Large`.
+
+- **`OUROBOROS_SKIP_SCOPE_REVIEW` environment variable**: Set to `"1"` to disable scope review entirely.
+  When set, review pipeline uses triad-only validation. Trade-off: reduced cross-module safety, but commits proceed on providers with payload limits.
+- **Use case**: When only Cloud.ru keys are available and scope review cannot run, set `OUROBOROS_SKIP_SCOPE_REVIEW=1` before commits. Triad review still validates the diff against CHECKLISTS.md.
+- **Implementation**: Checked in `parallel_review.py::_run_scope()` before invoking scope reviewer. Returns a non-blocking fallback result when the flag is set.
+- **Documented rationale**: Cloud.ru models work well for triad review (diff-only context) but cannot handle full-repo scope review. The environment variable makes this constraint explicit and configurable rather than hardcoded.
+
 #### Triad diff review (enriched)
 
 - Three models review the staged diff against "Repo Commit Checklist" from CHECKLISTS.md.

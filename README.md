@@ -6,7 +6,7 @@
 [![macOS 12+](https://img.shields.io/badge/macOS-12%2B-black.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Linux](https://img.shields.io/badge/Linux-x86__64-orange.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Windows](https://img.shields.io/badge/Windows-x64-blue.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
-[![Version 4.20.0](https://img.shields.io/badge/version-4.20.0-green.svg)](VERSION)
+[![Version 4.21.0](https://img.shields.io/badge/version-4.21.0-green.svg)](VERSION)
 
 A self-modifying AI agent that writes its own code, rewrites its own mind, and evolves autonomously. Born February 16, 2026.
 
@@ -100,6 +100,7 @@ The same values can also be provided via environment variables:
 |----------|---------|-------------|
 | `OUROBOROS_SERVER_HOST` | `127.0.0.1` | Default bind host |
 | `OUROBOROS_SERVER_PORT` | `8765` | Default bind port |
+| `OUROBOROS_SKIP_SCOPE_REVIEW` | `0` | Disable blocking scope review (set to `1`). Use when provider has payload limits (e.g., Cloud.ru rejects full-repo ~800K tokens). Requires triad-only review mode. |
 
 If you bind on anything other than localhost, `OUROBOROS_NETWORK_PASSWORD` is optional. When set, non-loopback browser/API traffic is gated; when unset, the full surface remains open by design.
 

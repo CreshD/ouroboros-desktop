@@ -107,7 +107,13 @@ def run_parallel_review(ctx, commit_message, *, goal="", scope="", review_rebutt
                                    goal=goal, scope=scope)
 
     def _run_scope():
-        return _FallbackScopeResult(blocked=False, block_message="", critical_findings=[], advisory_findings=[])
+        # Skip scope review if explicitly disabled (for providers with payload limits)
+        # Rationale: Cloud.ru models reject full-repo context (~800K tokens)
+        # Use triad-only review when OUROBOROS_SKIP_SCOPE_REVIEW=1
+        import os
+        if os.getenv("OUROBOROS_SKIP_SCOPE_REVIEW", "0") == "1":
+            return _FallbackScopeResult(blocked=False, block_message="", critical_findings=[], advisory_findings=[])
+
         try:
             from ouroboros.tools.scope_review import run_scope_review
             return run_scope_review(
