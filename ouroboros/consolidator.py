@@ -36,7 +36,7 @@ log = logging.getLogger(__name__)
 BLOCK_SIZE = 100                          # Messages per consolidation block
 MAX_SUMMARY_BLOCKS = 10                   # Compress into era when exceeded
 ERA_COMPRESS_COUNT = 4                    # Oldest blocks to compress per era
-CONSOLIDATION_MODEL = "google/gemini-3-flash-preview"
+CONSOLIDATION_MODEL = "cloudru::zai-org/GLM-4.7"
 CONSOLIDATION_REASONING_EFFORT = "medium"
 MAX_SUMMARY_CHARS = 90000                 # Hard cap preserved from old system
 
