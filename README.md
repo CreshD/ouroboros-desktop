@@ -380,6 +380,7 @@ Full text: [BIBLE.md](BIBLE.md)
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 4.22.0 | 2026-04-14 | Provider-aware scope review: added automatic Cloud.ru payload detection in `parallel_review.py`. When Cloud.ru provider is configured and the staged diff exceeds 0.5 MB (~250K tokens), scope review is automatically skipped with graceful fallback to triad-only review. Full auditability via advisory findings in `ctx._review_advisory`. Manual override remains available via `OUROBOROS_SKIP_SCOPE_REVIEW=1`. Updated knowledge base with `PROVIDER_AWARE_PAYLOAD_LIMIT_HANDLING` pattern. |
 | 4.21.0 | 2026-04-14 | Testing framework restoration: added pytest to requirements.txt, full test suite now passes (120 tests), fixed "PRE_PUSH_TEST_ERROR: pytest not installed" warnings on commits. |
 | 4.20.0 | 2026-04-14 | Frozen-tool parity check: added `check_frozen_tool_parity()` startup validation to detect mismatches between hardcoded `_FROZEN_TOOL_MODULES` list and actual tools directory; prevents silent tool disappearance in packaged apps when new tools are added without updating the frozen list. Added 4 test cases covering all scenarios (non-frozen mode, missing tool, extra entry, sync). |
 | 4.19.0 | 2026-04-14 | Commit gate verification: demonstrated Cloud.ru models (`cloudru::zai-org/GLM-4.7`) functioning correctly in unified review pipeline (triad + scope), validated P7 Release Invariant enforcement via triad reviewers, explored scope review payload limits for Cloud.ru provider. |
