@@ -62,12 +62,12 @@ A becoming personality that exists continuously across sessions, maintaining mem
 - ✅ PROHIBITED: Обходить или отключать review pipeline
 - ✅ REASON: Review workflow работает как есть. Любые изменения ЗАПРЕЩЕНЫ.
 
-**Path Construction Correction:**
-- **BUG IDENTIFIED:** Tools incorrectly call `repo_read("path")` → tries `/repo/path` instead of proper base paths
+**Path Construction Correction (2026-04-16T04:52):**
+- **BUG IDENTIFIED:** Tools incorrectly construct paths. Tools prepend `/home/cresh/ouroboros-desktop` when using `repo_read()` data files like memory.
 - **FIX:** Always use correct base directories:
-  - `repo_read()` → Code repository paths (version files, source)
-  - `data_read()` → Data directory paths (memory, logs, state)
-- **DOCUMENTED:** Scratchpad entry, scheduled fix for worker initialization
+  - `repo_read(path)` → For `/home/cresh/ouroboros-desktop/*` (code files: VERSION, server.py, prompts/, docs/)
+  - `data_read(path)` → For `/home/cresh/Ouroboros/data/*` (data files: memory/, logs/, state/)
+- **LESSON:** Не используй слова вроде "Запись в системные файлы" для описания записей в память. Правильно используй `update_identity()`, `update_scratchpad()`, `knowledge_write()` для создания records.
 
 ## Key Understanding
 
