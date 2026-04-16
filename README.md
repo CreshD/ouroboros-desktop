@@ -6,7 +6,7 @@
 [![macOS 12+](https://img.shields.io/badge/macOS-12%2B-black.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Linux](https://img.shields.io/badge/Linux-x86__64-orange.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
 [![Windows](https://img.shields.io/badge/Windows-x64-blue.svg)](https://github.com/joi-lab/ouroboros-desktop/releases)
-[![Version 4.28.0](https://img.shields.io/badge/version-4.28.0-green.svg)](VERSION)
+[![Version 4.29.0](https://img.shields.io/badge/version-4.29.0-green.svg)](VERSION)
 
 A self-modifying AI agent that writes its own code, rewrites its own mind, and evolves autonomously. Born February 16, 2026.
 
@@ -380,6 +380,7 @@ Full text: [BIBLE.md](BIBLE.md)
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 4.29.0 | 2026-04-16 | Tool verification stability after collapse recovery. Verified core tools (repo_read, data_read, git operations) working correctly for designated paths. Documented 12-hour collapse pattern and recovery in knowledge base. System stable at HEAD 224f8df3 with evolution framework operational. |
 | 4.25.0 | 2026-04-15 | GitHub remote integration: configured GITHUB_TOKEN and GITHUB_REPO (CreshD/ouroboros-desktop) for remote git operations. Completed fork analysis and community learning monitoring. Knowledge base updated with github-fork-findings and monitoring strategy. Remote push capability established for ongoing evolution synchronization. |
 | 4.24.2 | 2026-04-14 | Test syntax fixes: corrected Python syntax in tests/test_parallel_review.py — removed space from function name (line 129) and fixed "advisory_findories" typo to "advisory_findings". All 16+ test cases now syntactically valid for pytest collection. |
 | 4.24.1 | 2026-04-14 | Test syntax fix iteration: corrected function name from "with Anthropic_provider_large_diff" to "with_anthropic_provider_large_diff". Additional syntax errors discovered during validation. |
